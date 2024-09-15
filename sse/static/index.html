@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Chat</title>
+</head>
+
+<body>
+    <h1>SSE Single Chat</h1>
+    <div>
+        <label for="userId">Your User ID:</label>
+        <input type="text" id="userId" placeholder="Enter your user ID">
+        <button onclick="connect()">Connect</button>
+    </div>
+    <div>
+        <label for="toUserId">To User ID:</label>
+        <input type="text" id="toUserId" placeholder="Enter recipient's user ID">
+        <label for="message">Message:</label>
+        <input type="text" id="message" placeholder="Enter your message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <div id="messages"></div>
+    
+    <div>
+        <a href="/multi">Go to Multi Chat</a>
+    </div>
+
+
+    <script>
+        let eventSource;
+
+        function connect() {
+            const userId = document.getElementById('userId').value;
+            if (eventSource) {
+                eventSource.close();
+            }
+            eventSource = new EventSource(`/connect/${userId}`);
+            eventSource.onmessage = function (event) {
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML += `<p>${event.data}</p>`;
+            };
+        }
+
+        function sendMessage() {
+            const fromId = document.getElementById('userId').value;
+            const toId = document.getElementById('toUserId').value;
+            const message = document.getElementById('message').value;
+            fetch(`/send/${fromId}/${toId}/${message}`, { method: 'POST' })
+                .then(response => response.text())
+                .then(text => console.log(text))
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+
+</html>
